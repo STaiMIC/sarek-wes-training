@@ -1,5 +1,5 @@
 {
-  "name": "Sarek WES Training (30-min Practical)",
+  "name": "Sarek WES Training",
   "image": "mcr.microsoft.com/devcontainers/miniconda:3-bullseye",
   "features": {
     "ghcr.io/devcontainers/features/docker-in-docker:2": {

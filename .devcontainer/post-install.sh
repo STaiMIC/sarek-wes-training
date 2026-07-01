@@ -1,62 +1,57 @@
 #!/bin/bash
-#
 # post-install.sh
-# ~~~~~~~~~~~~~~~
-# Codespace auto-setup for 30-minute practical.
-# Creates conda environment + installs Nextflow.
-#
+# Runs automatically when GitHub Codespace starts.
+# Installs Nextflow, clones Sarek 3.9.0, downloads test FASTQs.
 
 set -e
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║  Sarek WES Training — Environment Setup (auto, <2 min)       ║"
+echo "║  Sarek WES Training — Codespace Setup (auto, ~3 min)        ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 
-# Check conda
-echo "✓ Conda: $(conda --version)"
-echo ""
+# Step 1 — Install Nextflow via conda
+echo "Installing Nextflow..."
+conda install -y -c bioconda nextflow > /dev/null 2>&1
+echo "Nextflow: $(nextflow -version 2>&1 | head -1)"
 
-# Create conda environment
-echo "📦 Creating conda environment: sarek-wes"
-conda create -n sarek-wes -y -c bioconda -c conda-forge \
-  nextflow=25.10.0 \
-  bwa=0.7.17 \
-  samtools=1.17 \
-  bcftools=1.17 \
-  gatk4=4.4.0.0 \
-  mosdepth=0.3.6 \
-  multiqc=1.14 \
-  > /dev/null 2>&1
+# Step 2 — Clone Sarek 3.9.0
+echo ""
+echo "Cloning nf-core/sarek 3.9.0 (this takes ~30 seconds)..."
+if [ ! -d "$HOME/sarek-39" ]; then
+    git clone --depth 1 --branch 3.9.0 \
+        https://github.com/nf-core/sarek.git \
+        $HOME/sarek-39 > /dev/null 2>&1
+    echo "✅ Sarek 3.9.0 ready at ~/sarek-39"
+else
+    echo "✅ Sarek 3.9.0 already present"
+fi
+
+# Step 3 — Download test FASTQ files
+echo ""
+echo "Downloading test FASTQ files (~15MB)..."
+mkdir -p /workspaces/sarek-wes-training/data/fastq
+
+BASE="https://raw.githubusercontent.com/nf-core/test-datasets/modules/data/genomics/homo_sapiens/illumina/fastq"
+
+wget -q -O /workspaces/sarek-wes-training/data/fastq/test_1.fastq.gz \
+    $BASE/test_1.fastq.gz && echo "  ✅ test_1.fastq.gz"
+wget -q -O /workspaces/sarek-wes-training/data/fastq/test_2.fastq.gz \
+    $BASE/test_2.fastq.gz && echo "  ✅ test_2.fastq.gz"
+wget -q -O /workspaces/sarek-wes-training/data/fastq/test2_1.fastq.gz \
+    $BASE/test2_1.fastq.gz && echo "  ✅ test2_1.fastq.gz"
+wget -q -O /workspaces/sarek-wes-training/data/fastq/test2_2.fastq.gz \
+    $BASE/test2_2.fastq.gz && echo "  ✅ test2_2.fastq.gz"
 
 echo ""
-echo "✓ Conda environment created"
-echo ""
-
-# Initialize conda
-conda init bash 2>/dev/null || true
-
-# Activate environment
-source $(conda info --base)/etc/profile.d/conda.sh
-conda activate sarek-wes
-
-echo "✓ Nextflow: $(nextflow -version 2>&1 | head -1)"
-echo "✓ BWA: $(bwa 2>&1 | grep -E 'Version|Sai' || echo 'installed')"
-echo "✓ Samtools: $(samtools --version | head -1)"
-echo ""
-
-echo "════════════════════════════════════════════════════════════════"
-echo ""
-echo "✅ Setup complete! Ready for 30-minute practical."
-echo ""
-echo "📖 Quick start:"
-echo ""
-echo "  1. Understand samplesheet (instant):"
-echo "     nextflow run course/01_samplesheet.nf"
-echo ""
-echo "  2. Run full pipeline (~15 min):"
-echo "     bash main.sh"
-echo ""
-echo "════════════════════════════════════════════════════════════════"
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║  ✅ Setup complete! You are ready to run:                   ║"
+echo "║                                                              ║"
+echo "║  Step 1 — Understand the samplesheet (instant):            ║"
+echo "║     nextflow run course/01_samplesheet.nf                  ║"
+echo "║                                                              ║"
+echo "║  Step 2 — Run full WES pipeline (~20 min):                 ║"
+echo "║     bash main.sh                                            ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""

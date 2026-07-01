@@ -29,6 +29,14 @@ fi
 echo "✓ Nextflow found: $(nextflow -version 2>&1 | head -1)"
 echo "✓ Java found: $(java -version 2>&1 | head -1)"
 echo "✓ Docker found: $(docker --version 2>&1)"
+
+# Verify Docker daemon is running
+if ! docker ps > /dev/null 2>&1; then
+    echo "❌ ERROR: Docker daemon is not running."
+    echo "   Please start Docker Desktop and try again."
+    exit 1
+fi
+echo "✓ Docker daemon is running"
 echo ""
 
 echo "Running Sarek WES pipeline..."
@@ -46,10 +54,10 @@ echo ""
 
 # Run Sarek using Docker
 # Genome and resource limits are set in nextflow.config
-nextflow run /tmp/sarek-39 \
+nextflow run $HOME/sarek-39 \
   -profile docker \
-  --input "$HOME/sarek-wes-training/data/samplesheet.csv" \
-  --outdir "$HOME/sarek-wes-training/results" \
+  --input "$REPO_ROOT/data/samplesheet.csv" \
+  --outdir "$REPO_ROOT/results" \
   --genome testdata.nf-core.sarek \
   --igenomes_base 'https://raw.githubusercontent.com/nf-core/test-datasets/modules/data/' \
   --tools strelka \
