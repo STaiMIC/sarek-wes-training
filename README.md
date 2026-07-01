@@ -2,7 +2,7 @@
 
 <div align="center">
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/Nkiruka-Cynthia/sarek-wes-training)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/STaiMIC/sarek-wes-training)
 [![nf-core](https://img.shields.io/badge/nf--core-sarek%203.9.0-brightgreen)](https://nf-co.re/sarek)
 [![Nextflow](https://img.shields.io/badge/nextflow-%E2%89%A526.04-blue)](https://www.nextflow.io/)
 [![Docker](https://img.shields.io/badge/container-Docker-2496ED)](https://www.docker.com/)
@@ -101,7 +101,7 @@ We analyse **four WES samples from two patients** — a design that lets us demo
 
 ### Step 1 — Open in GitHub Codespaces
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/Nkiruka-Cynthia/sarek-wes-training)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)]((https://codespaces.new/STaiMIC/sarek-wes-training))
 
 Click the badge above or navigate to:
 ```
