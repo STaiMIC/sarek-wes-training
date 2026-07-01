@@ -13,15 +13,10 @@ results_homework/
 
 # Reference files — too large for Git
 reference/
-*.fasta
-*.fa
 *.fasta.gz
 *.fa.gz
 *.bam
 *.bai
-*.vcf
-*.vcf.gz
-*.tbi
 
 # Python
 __pycache__/
@@ -44,3 +39,4 @@ Thumbs.db
 # Conda
 .conda/
 conda-env/
+data/fastq/
