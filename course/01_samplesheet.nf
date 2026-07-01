@@ -23,12 +23,12 @@ workflow {
         ╔════════════════════════════════════════════════════════════════╗
         ║  LESSON 1: WES Samplesheet Structure (2–3 min)                ║
         ║                                                                ║
-        ║  How does Nextflow read multi-sample WES data?               ║
+        ║  How does Nextflow read multi-sample WES data?                ║
         ║  → Answer: From a simple CSV file!                            ║
         ╚════════════════════════════════════════════════════════════════╝
     """)
 
-    println("\n📄 Reading samplesheet: ${params.input}\n")
+    println("\n Reading samplesheet: ${params.input}\n")
 
     // Load and parse the CSV
     ch_samples = channel
@@ -37,9 +37,10 @@ workflow {
         .map { row ->
             def meta = [
                 patient: row.patient,
-                sample: row.sample,
-                lane: row.lane,
-                status: row.status ?: '0'
+                sex    : row.sex,
+                status : row.status ?: '0',
+                sample : row.sample,
+                lane   : row.lane
             ]
             [
                 meta,
@@ -50,29 +51,27 @@ workflow {
 
     // Display samples
     ch_samples.view { meta, r1, r2 ->
-        "✓ [${meta.patient}, ${meta.sample}, ${r1.name}, ${r2.name}, status=${meta.status}]"
+        "✓ [${meta.patient} | sex=${meta.sex} | status=${meta.status} | sample=${meta.sample} | ${r1.name}]"
     }
 
     // Summary
     ch_samples
         .collect()
         .view { samples ->
-            "\n📊 Total samples: ${samples.size()}\n"
+            "\n Total samples: ${samples.size()}\n"
         }
 
     println("""
-        📖 Key columns in samplesheet.csv:
+         Key columns in samplesheet.csv (in order):
         • patient:  Groups samples from same individual
+        • sex:      Biological sex (XX/XY) — required by Sarek
+        • status:   0=normal/germline, 1=tumor
         • sample:   Unique sample identifier
-        • lane:     Sequencing lane
+        • lane:     Sequencing lane (e.g. L001)
         • fastq_1:  Forward reads (R1)
         • fastq_2:  Reverse reads (R2)
-        • status:   0=normal, 1=tumor (for somatic variant calling)
 
-        💡 This CSV structure allows Sarek to:
-        • Handle multiple patients
-        • Process multiple samples per patient
-        • Compare tumor vs. normal pairs for somatic calling
-        • Scale to 100+ samples with no code changes!
+        💡 status=1 flags tumor samples so Strelka can run
+           somatic (tumor vs. normal) variant calling automatically!
     """)
 }

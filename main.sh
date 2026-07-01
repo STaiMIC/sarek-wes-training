@@ -3,12 +3,9 @@
 # main.sh
 # ~~~~~~~
 # Single entry script for the complete Sarek WES training pipeline.
-# For 30-minute practical: students run this ONE command.
+# Students run ONE command: bash main.sh
 #
-# Usage:
-#   bash main.sh
-#
-# Expected runtime: ~15 minutes (with conda on test data)
+# Expected runtime: ~15-20 minutes on a 2-core/8GB GitHub Codespace
 
 set -e
 
@@ -17,7 +14,7 @@ cd "$REPO_ROOT"
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║  Sarek WES Training — 30-Minute Practical Exercise          ║"
+echo "║  Sarek WES Training - Practical Exercise                     ║"
 echo "║  Complete pipeline: FASTQ → Aligned BAM → Variant VCF        ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
@@ -30,51 +27,54 @@ if ! command -v nextflow &> /dev/null; then
 fi
 
 echo "✓ Nextflow found: $(nextflow -version 2>&1 | head -1)"
+echo "✓ Java found: $(java -version 2>&1 | head -1)"
+echo "✓ Docker found: $(docker --version 2>&1)"
 echo ""
 
-# Activate conda environment if it exists
-if [ -f "$CONDA_PREFIX/etc/profile.d/conda.sh" ]; then
-    source "$CONDA_PREFIX/etc/profile.d/conda.sh"
-    conda activate sarek-wes 2>/dev/null || true
-    echo "✓ Conda environment activated"
-fi
-
+echo "Running Sarek WES pipeline..."
 echo ""
-echo "⏱️  Running Sarek WES pipeline (test data, ~15 minutes)..."
+echo "Stages that will run:"
+echo "  1. FASTP         → Quality control on raw FASTQ reads"
+echo "  2. BWA-MEM       → Align reads to reference genome"
+echo "  3. MarkDuplicates → Remove PCR duplicates from BAM"
+echo "  4. Strelka       → Variant calling (germline + somatic)"
+echo "  5. MultiQC       → Aggregate all QC metrics into one report"
 echo ""
-echo "Stages:"
-echo "  1. FASTP: Quality control on raw FASTQ files"
-echo "  2. BWA-MEM: Align reads to GRCh38 reference genome"
-echo "  3. MarkDuplicates: Remove PCR duplicates"
-echo "  4. Strelka: Variant calling (germline & somatic)"
-echo "  5. VEP: Variant annotation with functional predictions"
-echo "  6. MultiQC: Aggregate QC metrics"
+echo "Note: Annotation (VEP) is shown via examples/annotated_example.vcf"
+echo "      — it needs a large cache download unsuitable for live sessions."
 echo ""
 
-# Run Sarek WES pipeline
-nextflow run nf-core/sarek \
-  -profile conda,test_wes \
-  --input "$REPO_ROOT/data/samplesheet.csv" \
-  --outdir "$REPO_ROOT/results" \
-  --tools strelka,vep \
+# Run Sarek using Docker
+# Genome and resource limits are set in nextflow.config
+nextflow run /tmp/sarek-39 \
+  -profile docker \
+  --input "$HOME/sarek-wes-training/data/samplesheet.csv" \
+  --outdir "$HOME/sarek-wes-training/results" \
+  --genome testdata.nf-core.sarek \
+  --igenomes_base 'https://raw.githubusercontent.com/nf-core/test-datasets/modules/data/' \
+  --tools strelka \
   --skip_tools baserecalibrator \
+  --wes \
+  --disable_wave \
   -resume
 
 echo ""
 echo "════════════════════════════════════════════════════════════════"
+echo "Pipeline complete!"
 echo ""
-echo "✅ Pipeline complete!"
+echo "Results locations:"
+echo "   • Preprocessing:   results/preprocessing/"
+echo "   • Variant calls:   results/variant_calling/strelka/"
+echo "   • QC report:       results/multiqc/multiqc_report.html"
+echo "   • Pipeline info:   results/pipeline_info/"
 echo ""
-echo "📊 Results locations:"
-echo "   • Aligned BAMs:       results/bam/"
-echo "   • Variant calls:      results/variant_calling/strelka/"
-echo "   • Annotated VCFs:     results/annotation/vep/"
-echo "   • QC report:          results/multiqc/multiqc_report.html"
-echo ""
-echo "📖 Next steps:"
+echo "Next steps:"
 echo "   1. Open results/multiqc/multiqc_report.html in your browser"
-echo "   2. Inspect VCF files for detected variants"
-echo "   3. Read the REFERENCE.md for Nextflow + Sarek concepts"
+echo "   2. Inspect VCF files:"
+echo "      zcat results/variant_calling/strelka/*/germline.vcf.gz | head -50"
+echo "   3. Compare with examples/annotated_example.vcf to see what"
+echo "      VEP annotation adds on top of these raw variant calls"
+echo "   4. Read course/REFERENCE.md for Nextflow + Sarek concepts"
 echo ""
 echo "════════════════════════════════════════════════════════════════"
 echo ""

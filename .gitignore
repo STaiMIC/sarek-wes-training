@@ -3,6 +3,9 @@ work/
 .nextflow/
 .nextflow.log*
 
+# Nextflow run logs
+run_log*.txt
+
 # Local results (not pre-computed ones)
 results/
 results_example/
